@@ -97,6 +97,31 @@ def makeTxtFile(f, Brand, file_type, team_roster):
         else: f.write(f"{title_names[5]} (Women's Tag): {Brand.champions[5][0]} & {Brand.champions[5][1]}\n")
     f.write("\n\n")
 
+    f.write("Divisions\n")
+    f.write("=" * 30 + "\n\n")
+
+    f.write(f"{title_names[0]} Title\n")
+    f.write("=" * 30 + "\n")
+    for d in Brand.divisions[0]: f.write(f"{d}\n")
+    f.write("\n\n")
+
+    f.write(f"{title_names[1]} Title\n")
+    f.write("=" * 30 + "\n")
+    for d in Brand.divisions[1]: f.write(f"{d}\n")
+    f.write("\n\n")
+
+    f.write(f"{title_names[2]} Title\n")
+    f.write("=" * 30 + "\n")
+    for d in Brand.divisions[2]:
+        if team_roster: f.write(f"{d}\n")
+        else: f.write(f"{d[0]} & {d[1]}\n")
+    f.write("\n\n")
+
+    f.write(f"{title_names[4]} Title\n")
+    f.write("=" * 30 + "\n")
+    for d in Brand.divisions[3]: f.write(f"{d}\n")
+    f.write("\n\n")
+
     f.write("Rivalries\n")
     f.write("=" * 30 + "\n")
     for r in Brand.feuds: f.write(f"{r}\n")
@@ -165,6 +190,35 @@ def createSpreadsheet(Brand, brand_number, draft_workbook, roster_sheet, tag_tea
         if team_roster: champions_sheet.cell(row=7, column=brand_number + 1).value = f"{Brand.champions[5]}"
         else: champions_sheet.cell(row=7, column=brand_number + 1).value = f"{Brand.champions[5][0]} & {Brand.champions[5][1]}"
 
+    # Populate Divisions Sheet columns per brand (4 columns per brand: World, Midcard, Tag, Women's)
+    title_number = 4
+    start_col = brand_number * title_number - (title_number - 1)
+    divisions_sheet.cell(row=1, column=start_col).value = Brand.name
+    divisions_sheet.merge_cells(start_row=1, start_column=start_col, end_row=1, end_column=start_col + title_number - 1)
+
+    divisions_sheet.cell(row=2, column=start_col).value = f"{tn[0]} Title"
+    divisions_sheet.cell(row=2, column=start_col + 1).value = f"{tn[1]} Title"
+    divisions_sheet.cell(row=2, column=start_col + 2).value = f"{tn[2]} Title"
+    divisions_sheet.cell(row=2, column=start_col + 3).value = f"{tn[4]} Title"
+
+    for row in range(len(Brand.divisions[0])):
+        divisions_sheet.cell(row=row + 3, column=start_col).value = Brand.divisions[0][row]
+    for row in range(len(Brand.divisions[1])):
+        divisions_sheet.cell(row=row + 3, column=start_col + 1).value = Brand.divisions[1][row]
+    for row in range(len(Brand.divisions[2])):
+        if team_roster:
+            divisions_sheet.cell(row=row + 3, column=start_col + 2).value = f"{Brand.divisions[2][row]}"
+        else:
+            divisions_sheet.cell(row=row + 3, column=start_col + 2).value = f"{Brand.divisions[2][row][0]} & {Brand.divisions[2][row][1]}"
+    for row in range(len(Brand.divisions[3])):
+        divisions_sheet.cell(row=row + 3, column=start_col + 3).value = Brand.divisions[3][row]
+
+    if womens_tag_division:
+        women_tag_sheet.cell(row=1, column=1).value = "Women's Tag Team Division"
+        for row in range(len(womens_tag_division)):
+            if women_team_roster: women_tag_sheet.cell(row=row + 2, column=1).value = f"{womens_tag_division[row]}"
+            else: women_tag_sheet.cell(row=row + 2, column=1).value = f"{womens_tag_division[row][0]} & {womens_tag_division[row][1]}"
+
     feuds_sheet.cell(row=1, column=brand_number).value = Brand.name
     for row in range(len(Brand.feuds)):
         feuds_sheet.cell(row=row + 2, column=brand_number).value = Brand.feuds[row]
@@ -177,9 +231,11 @@ def createSpreadsheet(Brand, brand_number, draft_workbook, roster_sheet, tag_tea
     ]
 
     for b in range(1, brand_number + 1):
+        div_header = b * title_number - (title_number - 1)
         roster_sheet.cell(row=1, column=b).fill = brand_colors[b - 1]
         tag_teams_sheet.cell(row=1, column=b).fill = brand_colors[b - 1]
         champions_sheet.cell(row=1, column=b + 1).fill = brand_colors[b - 1]
+        divisions_sheet.cell(row=1, column=div_header).fill = brand_colors[b - 1]
         feuds_sheet.cell(row=1, column=b).fill = brand_colors[b - 1]
 
     if file_type == "Spreadsheet": draft_workbook.save("Draft.xlsx")
@@ -208,30 +264,4 @@ def developBrand(Brand, team_number, women_tag_number, draft_file, file_type, te
     Brand.assignDivisions(Brand.teams, team_roster_flag)
     Brand.assignFeuds(Brand.divisions, team_roster_flag)
     if file_type == "Text":
-        makeTxtFile(draft_file, Brand, "Text", team_roster_flag)
-
-def createWomenTagDivision(women_tag_number, brands, draft_file, file_type, women_team_roster):
-    if women_tag_number == 0: return []
-    womens_tag_division = []
-    for b in brands:
-        womens_tag_division += b.women_teams
-    if not womens_tag_division: return []
-    random.shuffle(womens_tag_division)
-    womens_tag_champions = womens_tag_division[0]
-    if file_type == "Text": writeWomenTag(draft_file, womens_tag_division, womens_tag_champions, women_team_roster)
-    return womens_tag_division
-
-def createIntergenderDivision(ig_number, brands, draft_file, file_type):
-    if ig_number == 0: return []
-    ig_division = []
-    for b in brands:
-        brand_pool = b.men + b.women
-        random.shuffle(brand_pool)
-        ig_division += brand_pool[:ig_number]
-    if not ig_division: return []
-    random.shuffle(ig_division)
-    ig_champion = ig_division[0]
-    title_name = brands[0].title_names[3] if len(brands[0].title_names) > 3 else "Intergender Championship"
-    if file_type == "Text": 
-        writeIntergenderDivision(draft_file, ig_division, ig_champion, title_name)
-    return ig_division
+        makeTxtFile(draft_file, Brand, "Text
