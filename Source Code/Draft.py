@@ -5,29 +5,26 @@ from GUI import *
 def main():
     inputs = gui()
 
-    # create variables from inputs
-    male_roster_file, female_roster_file = inputs[0], inputs[1]  # roster inputs
-    brand_number, team_number = inputs[2], inputs[3]  # brand inputs
-    women_tag_number, second_midcard, women_midcard = inputs[4], inputs[5], inputs[6]  # optional division inputs
-    brand_names, title_names = inputs[7], inputs[8]  # name inputs
-    file_type = inputs[9]
-    team_roster_file, women_team_roster_file = inputs[10], inputs[11]
+    male_roster_file, female_roster_file = inputs[0], inputs[1]  
+    brand_number, team_number = inputs[2], inputs[3]  
+    women_tag_number, ig_number = inputs[4], inputs[5]  
+    second_midcard, women_midcard = inputs[6], inputs[7]  
+    brand_names, title_names = inputs[8], inputs[9]  
+    file_type = inputs[10]
+    team_roster_file, women_team_roster_file = inputs[11], inputs[12]
 
-    # get the rosters
     male_roster, female_roster = getRoster(male_roster_file), getRoster(female_roster_file)
     team_roster, women_team_roster = None, None
     if team_roster_file: team_roster = getRoster(team_roster_file)
     if women_team_roster_file: women_team_roster = getRoster(women_team_roster_file)
 
     draft_file = None
-    # create the draft text file
     if file_type == "Text":
         draft_file = open("draft.txt", 'w')
         draft_file.close()
         draft_file = open("draft.txt", 'a')
 
     if file_type == "Spreadsheet":
-        # create the draft spreadsheet
         draft_spreadsheet = xl.Workbook()
         rosters_sheet = draft_spreadsheet.create_sheet("Rosters")
         tag_teams_sheet = draft_spreadsheet.create_sheet("Tag Teams")
@@ -36,16 +33,12 @@ def main():
         feuds_sheet = draft_spreadsheet.create_sheet("Rivalries")
         women_tag_sheet = draft_spreadsheet.create_sheet("Women's Tag Division")
 
-
-
-    # draft the rosters
     men, women = draftRoster(male_roster, brand_number), draftRoster(female_roster, brand_number)
     teams, women_teams = None, None
     if team_roster: teams = draftRoster(team_roster, brand_number)
     if women_team_roster: women_teams = draftRoster(women_team_roster, brand_number)
 
-    # create the brands
-    brands = []  # list of the brands
+    brands = []  
 
     for i in range(0, brand_number):
         b = Brand(brand_names[i], men[i], women[i], title_names[i])
@@ -55,12 +48,11 @@ def main():
         else: developBrand(b, team_number, women_tag_number, second_midcard, women_midcard, draft_file, file_type, teams[i], women_teams[i])
         brands.append(b)
 
-    # set womens tag team champions if division exists
     womens_tag_division = createWomenTagDivision(women_tag_number, brands, draft_file, file_type, women_teams)
+    intergender_division = createIntergenderDivision(ig_number, brands, draft_file, file_type)
 
-    # create spreadsheet
     if file_type == "Spreadsheet":
-        i = 1  # iterator
+        i = 1  
         for b in brands:
             createSpreadsheet(b, i, draft_spreadsheet, rosters_sheet, tag_teams_sheet, champions_sheet, divisions_sheet,
                 feuds_sheet, women_tag_sheet, womens_tag_division, file_type, team_roster, women_team_roster)
@@ -84,12 +76,9 @@ def main():
             women_tag_sheet.column_dimensions[get_column_letter(col)].width = 25
             feuds_sheet.column_dimensions[get_column_letter(col)].width = 30
 
-        if file_type == "Spreadsheet": draft_spreadsheet.save("Draft.xlsx")
+        draft_spreadsheet.save("Draft.xlsx")
 
-    if file_type == "Text": sg.PopupOK("Success", "Your Universe has been successfully generated.\n"
-                                                  "Look for the Draft.txt file in the program's directory for the results")
-    elif file_type == "Spreadsheet": sg.PopupOK("Success", "Your Universe has been successfully generated.\n"
-                                                           "Look for the Draft.xlsx file in the program's directory for the results")
-
+    if file_type == "Text": sg.PopupOK("Success", "Your Universe has been successfully generated with Raw, Smackdown, NXT, and WCW!\nLook for the draft.txt file.")
+    elif file_type == "Spreadsheet": sg.PopupOK("Success", "Your Universe has been successfully generated with Raw, Smackdown, NXT, and WCW!\nLook for the Draft.xlsx file.")
 
 main()
