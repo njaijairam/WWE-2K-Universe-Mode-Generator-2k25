@@ -1,6 +1,6 @@
 import random
 import os
-import PySimpleGUI as sg
+import FreeSimpleGUI as sg
 from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
 import sys
 
