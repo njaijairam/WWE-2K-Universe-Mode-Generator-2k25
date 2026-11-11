@@ -2,9 +2,8 @@ import os, FreeSimpleGUI as sg
 from functions import *
 def gui():
     current_directory = os.getcwd()
-    sg.theme("DarkBlack")
+    sg.theme("DarkGrey4")  # Soft charcoal dark theme matching text boxes
 
-    # 6 title slots per brand: World, Midcard, Tag, Intergender, Women's World, Women's Tag
     title_names = [
         ["World Heavyweight", "Intercontinental", "Raw Tag Team", "Intergender", "Women's World", "Women's Tag Team"],  # Raw
         ["WWE Universal", "United States", "Smackdown Tag Team", "Intergender", "WWE Women's", "Women's Tag Team"],  # Smackdown
