@@ -1,5 +1,5 @@
 import random, os
-import PySimpleGUI as sg
+import FreeSimpleGUI as sg
 import openpyxl as xl
 from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
 from openpyxl.utils import get_column_letter
