@@ -2,7 +2,7 @@ import os, FreeSimpleGUI as sg
 from functions import *
 def gui():
     current_directory = os.getcwd()
-    sg.theme("DarkGrey14")
+    sg.theme("DarkBlack")
 
     # Championship names for Raw, Smackdown, NXT, WCW
     title_names = [
