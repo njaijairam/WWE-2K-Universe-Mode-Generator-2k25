@@ -1,4 +1,4 @@
-import os, PySimpleGUI as sg
+import os, FreeSimpleGUI as sg
 from functions import *
 def gui():
     current_directory = os.getcwd()
